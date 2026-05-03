@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="shortcut icon" href="favicon.ico">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="theme-color" content="#ffffff">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BannerFlix – Crie Banners Profissionais</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- COOKIE BANNER -->
+  <div id="cookieBanner" class="cookie-banner">
+    <span>🍪 Usamos cookies para melhorar sua experiência. Ao continuar, você concorda com nossa política.</span>
+    <button onclick="acceptCookies()">Aceitar</button>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <img src="https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/logo.png" alt="BannerFlix" class="nav-logo-img" />
+    </div>
+    <div class="nav-right">
+      <a href="#criador" class="btn-nav">Criar Banner</a>
+      <!-- Display de créditos (só aparece logado) -->
+      <div id="creditosDisplay" style="display:none;margin-right:16px;"></div>
+      <!-- Estado: deslogado -->
+      <button class="btn-nav-outline" id="btnAbrirAuth">Entrar</button>
+      <!-- Estado: logado -->
+      <div class="nav-user" id="navUser" style="display:none;">
+        <div class="nav-avatar" id="navAvatar">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="nav-user-menu" id="navUserMenu">
+          <div class="nav-user-email" id="navUserEmail"></div>
+          <hr style="border-color:var(--border);margin:6px 0"/>
+          <button onclick="abrirPerfil()">⚙️ Meu Perfil</button>
+          <button id="btnAdmin" onclick="window.location.href='admin.html'" style="display:none;">👑 Admin</button>
+          <button onclick="fazerLogout()">🚪 Sair</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MODAL AUTH - SISTEMA DE LICENÇAS -->
+  <div class="modal-overlay" id="modalAuth" onclick="fecharModalFora(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+
+      <!-- LOGIN COM CHAVE -->
+      <div id="formLogin">
+        <h2 class="modal-title">🔑 Acesso por Licença</h2>
+        <p class="modal-sub">Digite sua chave de licença para acessar o sistema</p>
+        
+        <div class="form-group">
+          <label>Chave de Licença</label>
+          <input 
+            type="text" 
+            id="licenseKeyInput" 
+            placeholder="Digite sua chave de licença" 
+            style="text-transform: uppercase;"
+            onkeydown="if(event.key==='Enter') fazerLoginComChave()"
+          />
+          <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; display: block;">
+            Entre em contato para obter sua chave de licença
+          </small>
+        </div>
+        
+        <div id="loginErro" class="auth-erro"></div>
+        
+        <button class="btn-auth" id="btnLoginChave" onclick="fazerLoginComChave()">
+          🔑 Entrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PERFIL -->
+  <div class="modal-overlay" id="modalPerfil" onclick="fecharModalFora(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+      <h2 class="modal-title">⚙️ Meu Perfil</h2>
+      <p class="modal-sub">Seus dados são salvos automaticamente e carregados em todo login.</p>
+
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" id="perfilNome" placeholder="Seu nome" />
+      </div>
+      <div class="form-group">
+        <label>WhatsApp</label>
+        <input type="text" id="perfilWhatsapp" placeholder="(11) 99999-9999" />
+      </div>
+      <div class="form-group">
+        <label>Instagram</label>
+        <input type="text" id="perfilInstagram" placeholder="@seuperfil" />
+      </div>
+      <div class="form-group">
+        <label>Site / URL</label>
+        <input type="text" id="perfilSite" placeholder="www.seusite.com" />
+        <div style="margin-top: 8px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted);">
+            <input type="checkbox" id="perfilCheckMostrarSiteBanner" checked style="width: 16px; height: 16px; cursor: pointer;" />
+            <span>Mostrar site no banner</span>
+          </label>
+          <small style="display: block; margin-top: 4px; font-size: 0.75rem; color: var(--text-muted); opacity: 0.7;">
+            Desmarque para mostrar apenas no resumo
+          </small>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Texto Extra</label>
+        <input type="text" id="perfilTexto" placeholder="Ex: Assine agora!" />
+      </div>
+
+      <div class="form-group">
+        <label>Logo</label>
+        <div class="logo-upload-area perfil-logo-area" onclick="document.getElementById('perfilLogoInput').click()">
+          <img id="perfilLogoPreview" src="" alt="" style="display:none;max-height:70px;" />
+          <div id="perfilLogoPlaceholder">
+            <span class="upload-icon">📁</span>
+            <p>Clique para escolher sua logo</p>
+          </div>
+        </div>
+        <input type="file" id="perfilLogoInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="perfilCarregarLogo(event)" />
+        <button class="btn-remove-logo" id="perfilBtnRemoveLogo" onclick="perfilRemoverLogo()" style="display:none;">✕ Remover Logo</button>
+      </div>
+
+      <div id="perfilErro" class="auth-erro"></div>
+      <div id="perfilSucesso" class="auth-sucesso"></div>
+      <button class="btn-auth" id="btnSalvarPerfil" onclick="salvarPerfil()">💾 Salvar Perfil</button>
+    </div>
+  </div>
+
+  <!-- MODAL CRIADOR DE VÍDEO -->
+  <div class="modal-overlay" id="modalVideo" onclick="fecharModalFora(event)">
+    <div class="modal-box modal-video">
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+      <h2 class="modal-title">🎬 Criar Vídeo com Trailer</h2>
+      <p class="modal-sub">Faça upload do trailer e adicione sua logo e contatos</p>
+
+      <!-- ETAPA 1: BUSCAR TRAILER -->
+      <div id="etapaTrailer" class="video-etapa">
+        <div class="video-info">
+          <strong id="videoFilmeNome"></strong>
+          <span id="videoFilmeAno"></span>
+        </div>
+
+        <div id="trailerCarregando" class="trailer-loading">
+          <span class="spinner"></span>
+          <p>Buscando trailer...</p>
+        </div>
+
+        <div id="trailerErro" class="trailer-erro" style="display:none;">
+          <p>❌ Trailer não encontrado</p>
+          <p style="font-size:0.85rem;margin-top:8px;">Você pode fazer upload do vídeo manualmente abaixo</p>
+        </div>
+
+        <div id="trailerEncontrado" class="trailer-encontrado" style="display:none;">
+          <p>✅ Trailer encontrado!</p>
+          <div class="trailer-acoes">
+            <button class="btn-trailer" onclick="abrirTrailerYoutube()">🎬 Abrir no YouTube</button>
+            <button class="btn-trailer" onclick="copiarLinkTrailer()">📋 Copiar Link</button>
+          </div>
+          <p class="trailer-instrucao">👆 Baixe o trailer usando <a href="https://y2meta.is/" target="_blank">y2meta.is</a> ou <a href="https://app.ytdown.to/pt27/" target="_blank">ytdown.to</a></p>
+        </div>
+
+        <div class="upload-video-area">
+          <h4>📤 Fazer Upload do Vídeo</h4>
+          <div class="video-upload-box" onclick="document.getElementById('videoInput').click()">
+            <div id="videoUploadPlaceholder">
+              <span class="upload-icon">🎬</span>
+              <p>Clique para escolher o vídeo do trailer</p>
+              <small>MP4, WebM, MOV (máx. 500MB)</small>
+            </div>
+            <video id="videoPreview" style="display:none;" controls></video>
+          </div>
+          <input type="file" id="videoInput" accept="video/*" style="display:none;" onchange="carregarVideo(event)" />
+          <button class="btn-remove-logo" id="btnRemoverVideo" onclick="removerVideo()" style="display:none;">✕ Remover Vídeo</button>
+        </div>
+
+        <button class="btn-auth" id="btnProximoEtapa" onclick="irParaEdicao()" style="display:none;">Próximo: Editar Vídeo →</button>
+      </div>
+
+      <!-- ETAPA 2: EDITAR VÍDEO -->
+      <div id="etapaEdicao" class="video-etapa" style="display:none;">
+        <div class="video-editor">
+          <div class="editor-preview">
+            <h4>Preview</h4>
+            <div class="video-canvas-wrapper">
+              <video id="videoEditor" style="width:100%;" controls></video>
+              <canvas id="videoCanvas" style="display:none;"></canvas>
+            </div>
+          </div>
+
+          <div class="editor-controles">
+            <h4>⚙️ Configurações</h4>
+            
+            <div class="form-group">
+              <label>Formato de Saída</label>
+              <select id="videoFormatoSaida" onchange="atualizarPreviewVideo()">
+                <option value="original">Original (manter proporção)</option>
+                <option value="stories">Stories (9:16 - 1080x1920)</option>
+                <option value="reels">Reels (9:16 - 1080x1920)</option>
+                <option value="feed">Feed (4:5 - 1080x1350)</option>
+                <option value="paisagem">Paisagem (16:9 - 1920x1080)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Duração</label>
+              <select id="videoDuracaoCorte">
+                <option value="completo">Vídeo completo</option>
+                <option value="15">Primeiros 15 segundos</option>
+                <option value="30">Primeiros 30 segundos</option>
+                <option value="60">Primeiros 60 segundos</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="videoMostrarLogo" checked onchange="atualizarPreviewVideo()" />
+                Mostrar minha logo
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label>Posição da Logo</label>
+              <select id="videoLogoPos" onchange="atualizarPreviewVideo()">
+                <option value="top-left">Superior Esquerdo</option>
+                <option value="top-right">Superior Direito</option>
+                <option value="bottom-left">Inferior Esquerdo</option>
+                <option value="bottom-right">Inferior Direito</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="videoMostrarTitulo" checked onchange="atualizarPreviewVideo()" />
+                Mostrar título do filme
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="videoMostrarContatos" checked onchange="atualizarPreviewVideo()" />
+                Mostrar contatos (WhatsApp/Instagram)
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label>Overlay</label>
+              <select id="videoOverlay" onchange="atualizarPreviewVideo()">
+                <option value="dark">Escuro</option>
+                <option value="purple">Roxo</option>
+                <option value="blue">Azul</option>
+                <option value="red">Vermelho</option>
+                <option value="none">Sem overlay</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-acoes">
+          <button class="btn-auth" onclick="voltarParaUpload()" style="background: var(--bg3);">← Voltar</button>
+          <button class="btn-auth" onclick="processarVideo()" id="btnProcessarVideo">🎬 Processar Vídeo</button>
+        </div>
+
+        <div id="videoProcessando" class="video-processando" style="display:none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <p id="progressTexto">Processando vídeo... 0%</p>
+          <small>Isso pode levar alguns minutos dependendo do tamanho do vídeo</small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Crie Banners<br/><span class="gradient-text">Profissionais</span><br/>em Segundos</h1>
+      <p>Busque qualquer filme, série ou jogos de futebol, adicione sua logo e gere artes prontas para Instagram, WhatsApp e YouTube.</p>
+      <a href="#criador" class="btn-primary">Criar Banner Agora 🚀</a>
+    </div>
+    <div class="hero-preview">
+      <div class="preview-card">
+        <div class="preview-badge">NOVO</div>
+        <div class="hero-slider">
+          <img src="https://i.imgur.com/aKhFsEO.jpeg" alt="Exemplo Banner 1" class="hero-slide active" data-theme="filmes" />
+          <img src="https://i.imgur.com/rWLZCp2.png" alt="Exemplo Banner 2" class="hero-slide" data-theme="futebol" />
+        </div>
+        <div class="slider-dots">
+          <span class="dot active" onclick="mudarSlide(0)"></span>
+          <span class="dot" onclick="mudarSlide(1)"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <h2>Marketing Profissional para Revendedores</h2>
+    <p class="features-sub">Sem precisar de Photoshop ou editores complexos. Tudo automático.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Catálogo Infinito</h3>
+        <p>Banco de dados com milhões de filmes e séries atualizados diariamente.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Sua Logo em Foco</h3>
+        <p>Faça upload da sua logo e ela será inserida automaticamente em todas as artes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>Formatos Sociais</h3>
+        <p>Feed 4:5 e Quadrado 1:1. Otimizados para cada plataforma.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Download Rápido</h3>
+        <p>Baixe em alta resolução ou compartilhe direto no WhatsApp e Instagram.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRIADOR DE BANNER -->
+  <section class="criador" id="criador">
+    
+    <!-- MENSAGEM PARA DESLOGADOS -->
+    <div id="criadorBloqueado" class="criador-bloqueado">
+      <div class="bloqueio-icon">🔒</div>
+      <h2>Faça login para criar banners</h2>
+      <p>Acesse com sua chave de licença para começar a criar banners profissionais.</p>
+      <button class="btn-primary" onclick="abrirWhatsApp()">Quero Testar</button>
+      <p class="auth-link">Já tem conta? <a href="#" onclick="event.preventDefault(); abrirModal('login')">Entrar</a></p>
+    </div>
+
+    <!-- CRIADOR (só aparece logado) -->
+    <div id="criadorConteudo" style="display:none;">
+      <div class="criador-header">
+        <h2>🎨 Criador de Banners</h2>
+        <p>Busque um filme, escolha sua logo e gere a arte</p>
+        
+        <!-- Seletor de Tipo de Banner -->
+        <div class="banner-type-selector">
+          <button class="type-btn active" onclick="selecionarTipo('filme')" id="btnTipoFilme">
+            🎬 Filmes & Séries
+          </button>
+          <button class="type-btn" onclick="selecionarTipo('futebol')" id="btnTipoFutebol">
+            ⚽ Futebol
+          </button>
+        </div>
+      </div>
+
+      <div class="criador-layout">
+
+      <!-- PAINEL ESQUERDO: CONTROLES -->
+      <div class="painel-controles">
+
+        <!-- PAINEL FILMES (ORIGINAL) -->
+        <div class="painel-filmes active" id="painelFilmes">
+          <!-- STEP 1: BUSCA -->
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h3>Buscar Filme ou Série</h3>
+            <div class="search-box">
+              <input type="text" id="searchInput" placeholder="Ex: Vingadores, Breaking Bad..." />
+              <button onclick="buscarFilme()" id="btnBuscar">🔍 Buscar</button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+          </div>
+        </div>
+
+        <!-- PAINEL FUTEBOL (NOVO) -->
+        <div class="painel-futebol" id="painelFutebol">
+          <!-- STEP 1: BUSCAR JOGOS -->
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h3>Buscar Jogos</h3>
+            <div class="liga-selector">
+              <select id="ligaSelect" onchange="buscarJogosFutebol()">
+                <option value="">Selecione uma Liga</option>
+                <optgroup label="🇧🇷 Brasil">
+                  <option value="BRA.1">Brasileirão Série A</option>
+                  <option value="BRA.2">Brasileirão Série B</option>
+                  <option value="BRA.3">Brasileirão Série C</option>
+                  <option value="BRA.CB">Copa do Brasil</option>
+                  <option value="BRA.RJ">Campeonato Carioca</option>
+                  <option value="BRA.SP">Campeonato Paulista</option>
+                  <option value="BRA.MG">Campeonato Mineiro</option>
+                  <option value="BRA.RS">Campeonato Gaúcho</option>
+                  <option value="BRA.BA">Campeonato Baiano</option>
+                  <option value="BRA.PE">Campeonato Pernambucano</option>
+                  <option value="BRA.CE">Campeonato Cearense</option>
+                </optgroup>
+                <optgroup label="🌎 América do Sul">
+                  <option value="CONMEBOL.LIBERTADORES">Copa Libertadores</option>
+                  <option value="CONMEBOL.SUDAMERICANA">Copa Sul-Americana</option>
+                  <option value="CONMEBOL.RECOPA">Recopa Sul-Americana</option>
+                  <option value="ARG.1">Liga Argentina</option>
+                  <option value="COL.1">Liga Colombiana</option>
+                  <option value="CHI.1">Liga Chilena</option>
+                  <option value="URU.1">Liga Uruguaia</option>
+                </optgroup>
+                <optgroup label="🌍 Europa">
+                  <option value="UEFA.CHAMPIONS">Champions League</option>
+                  <option value="UEFA.EUROPA">Europa League</option>
+                  <option value="UEFA.CONFERENCE">Conference League</option>
+                  <option value="UEFA.NATIONS">Nations League</option>
+                  <option value="ENG.1">Premier League</option>
+                  <option value="ENG.2">Championship</option>
+                  <option value="ESP.1">La Liga</option>
+                  <option value="ESP.2">La Liga 2</option>
+                  <option value="GER.1">Bundesliga</option>
+                  <option value="GER.2">2. Bundesliga</option>
+                  <option value="ITA.1">Serie A</option>
+                  <option value="ITA.2">Serie B</option>
+                  <option value="FRA.1">Ligue 1</option>
+                  <option value="FRA.2">Ligue 2</option>
+                  <option value="POR.1">Primeira Liga</option>
+                  <option value="NED.1">Eredivisie</option>
+                  <option value="SCO.1">Scottish Premiership</option>
+                  <option value="TUR.1">Süper Lig</option>
+                </optgroup>
+                <optgroup label="🌐 Mundial">
+                  <option value="FIFA.WORLDQ.CONMEBOL">Eliminatórias Sul-Americanas</option>
+                  <option value="FIFA.WORLDQ.UEFA">Eliminatórias Europeias</option>
+                  <option value="CONCACAF.CHAMPIONS">CONCACAF Champions Cup</option>
+                  <option value="CAF.CHAMPIONS">CAF Champions League</option>
+                </optgroup>
+              </select>
+              <button onclick="buscarTodosJogosDoDia()" id="btnBuscarTodos" style="background:var(--accent3);color:#fff;border:none;padding:10px 14px;border-radius:var(--radius);cursor:pointer;font-weight:600;white-space:nowrap;font-size:0.82rem;">🌍 Todos do Dia</button>
+              <button onclick="buscarJogosAmanha()" id="btnBuscarAmanha" style="background:var(--accent2);color:#fff;border:none;padding:10px 14px;border-radius:var(--radius);cursor:pointer;font-weight:600;white-space:nowrap;font-size:0.82rem;">📅 Amanhã</button>
+            </div>
+            <div id="jogosDisponiveis" class="jogos-disponiveis">
+              <!-- Jogos da API serão mostrados aqui -->
+            </div>
+          </div>
+          
+          <!-- STEP 2: JOGOS SELECIONADOS -->
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h3>Jogos Selecionados</h3>
+            <div id="jogosSelecionados">
+              <p class="empty-state">Nenhum jogo selecionado</p>
+            </div>
+            <div class="jogos-acoes">
+              <button onclick="limparJogosSelecionados()" class="btn-secondary">🗑️ Limpar Seleção</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: LOGO -->
+        <div class="step-card">
+          <div class="step-num step-num-logo">2</div>
+          <h3>Sua Logo</h3>
+          <div class="logo-upload-area" id="logoUploadArea" onclick="document.getElementById('logoInput').click()">
+            <img id="logoPreview" src="" alt="" style="display:none;" />
+            <div id="logoPlaceholder">
+              <span class="upload-icon">📁</span>
+              <p>Clique para escolher sua logo</p>
+              <small>PNG com fundo transparente recomendado</small>
+            </div>
+          </div>
+          <input type="file" id="logoInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="carregarLogo(event)" />
+          <button class="btn-remove-logo" id="btnRemoveLogo" onclick="removerLogo()" style="display:none;">✕ Remover Logo</button>
+        </div>
+
+        <!-- STEP 3: TEXTO -->
+        <div class="step-card">
+          <div class="step-num step-num-contato">3</div>
+          <h3>Informações de Contato</h3>
+          <div class="form-group">
+            <label>WhatsApp</label>
+            <input type="text" id="inputWhatsapp" placeholder="(11) 99999-9999" />
+          </div>
+          <div class="form-group">
+            <label>Instagram</label>
+            <input type="text" id="inputInstagram" placeholder="@seuperfil" />
+          </div>
+          <div class="form-group">
+            <label>Site / URL</label>
+            <input type="text" id="inputSite" placeholder="www.seusite.com" />
+            <div style="margin-top: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted);">
+                <input type="checkbox" id="checkMostrarSiteBanner" checked style="width: 16px; height: 16px; cursor: pointer;" onchange="if(tipoAtual === 'filme' && filmeAtual) gerarBannerAtual(); else if(tipoAtual === 'futebol' && jogosSelecionados.length > 0) gerarBannerAtual();" />
+                <span>Mostrar site no banner</span>
+              </label>
+              <small style="display: block; margin-top: 4px; font-size: 0.75rem; color: var(--text-muted); opacity: 0.7;">
+                Desmarque para mostrar apenas no resumo
+              </small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Texto Extra (opcional)</label>
+            <input type="text" id="inputTexto" placeholder="Ex: Assine agora!" />
+          </div>
+        </div>
+
+        <!-- STEP 4: FORMATO -->
+        <div class="step-card">
+          <div class="step-num step-num-estilo">4</div>
+          <h3>Estilo do Banner</h3>
+          <div class="template-options">
+            <label class="template-option">
+              <input type="radio" name="template" value="simples" checked onchange="salvarPreferencias(); alternarPainelTemplate(); atualizarFormato()" />
+              <div class="template-box">
+                <span class="template-icon">🎬</span>
+                <strong>Simples</strong>
+                <small>Fundo + Textos</small>
+              </div>
+            </label>
+            <label class="template-option">
+              <input type="radio" name="template" value="promocional" onchange="salvarPreferencias(); alternarPainelTemplate(); atualizarFormato()" />
+              <div class="template-box">
+                <span class="template-icon">🍿</span>
+                <strong>Promocional</strong>
+                <small>Estilo profissional</small>
+              </div>
+            </label>
+            <label class="template-option template-jogador-option">
+              <input type="radio" name="template" value="jogador" onchange="salvarPreferencias(); alternarPainelTemplate(); atualizarFormato()" />
+              <div class="template-box">
+                <span class="template-icon">⚽</span>
+                <strong>Jogador Destaque</strong>
+                <small>Com foto do jogador</small>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- STEP 5: FORMATO -->
+        <div class="step-card">
+          <div class="step-num step-num-formato">5</div>
+          <h3>Formato do Banner</h3>
+          <div class="format-options">
+            <label class="format-option">
+              <input type="radio" name="formato" value="feed" checked onchange="salvarPreferencias(); atualizarFormato()" />
+              <div class="format-box">
+                <div class="format-icon feed-icon"></div>
+                <span>Feed</span>
+                <small>4:5</small>
+              </div>
+            </label>
+            <label class="format-option">
+              <input type="radio" name="formato" value="whatsapp" onchange="salvarPreferencias(); atualizarFormato()" />
+              <div class="format-box">
+                <div class="format-icon whatsapp-icon"></div>
+                <span>Quadrado</span>
+                <small>1:1</small>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- STEP 6: COR DO OVERLAY / FUNDO PROMOCIONAL -->
+        <div class="step-card">
+          <div class="step-num step-num-cor">6</div>
+
+          <!-- Cores do Banner de Futebol (só aparece na aba futebol) -->
+          <div id="coresFutebolOpcoes" style="display:none;">
+            <h3>🎨 Cor de Destaque</h3>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:10px;">Altera DESTAQUES, Hora e Liga</p>
+            <div class="cor-selector" id="corFutebolUnica">
+              <div class="cor-opt active" data-cor="#F77F30" style="background:#F77F30;" onclick="selecionarCorFutebol('#F77F30',this)"></div>
+              <div class="cor-opt" data-cor="#E14760" style="background:#E14760;" onclick="selecionarCorFutebol('#E14760',this)"></div>
+              <div class="cor-opt" data-cor="#ffffff" style="background:#ffffff;" onclick="selecionarCorFutebol('#ffffff',this)"></div>
+              <div class="cor-opt" data-cor="#FFD700" style="background:#FFD700;" onclick="selecionarCorFutebol('#FFD700',this)"></div>
+              <div class="cor-opt" data-cor="#00FF87" style="background:#00FF87;" onclick="selecionarCorFutebol('#00FF87',this)"></div>
+              <div class="cor-opt" data-cor="#00BFFF" style="background:#00BFFF;" onclick="selecionarCorFutebol('#00BFFF',this)"></div>
+              <div class="cor-opt" data-cor="#FF4500" style="background:#FF4500;" onclick="selecionarCorFutebol('#FF4500',this)"></div>
+              <div class="cor-opt" data-cor="#9D2BBD" style="background:#9D2BBD;" onclick="selecionarCorFutebol('#9D2BBD',this)"></div>
+              <div class="cor-opt" data-cor="#FF69B4" style="background:#FF69B4;" onclick="selecionarCorFutebol('#FF69B4',this)"></div>
+              <div class="cor-opt" data-cor="#C0C0C0" style="background:#C0C0C0;" onclick="selecionarCorFutebol('#C0C0C0',this)"></div>
+            </div>
+          </div>
+
+          <!-- Overlay (futebol) -->
+          <div id="overlayFutebolOpcoes" style="display:none;">
+            <h3 style="margin-top:14px;">Estilo do Overlay</h3>
+            <div class="overlay-options">
+              <label class="overlay-opt" title="Escuro">
+                <input type="radio" name="overlayFutebol" value="dark" checked onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch dark-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Roxo">
+                <input type="radio" name="overlayFutebol" value="purple" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch purple-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Azul">
+                <input type="radio" name="overlayFutebol" value="blue" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch blue-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Vermelho">
+                <input type="radio" name="overlayFutebol" value="red" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch red-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Verde">
+                <input type="radio" name="overlayFutebol" value="green" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(20,83,45,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Laranja">
+                <input type="radio" name="overlayFutebol" value="orange" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(124,45,18,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Rosa">
+                <input type="radio" name="overlayFutebol" value="pink" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(131,24,67,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Cinza">
+                <input type="radio" name="overlayFutebol" value="gray" onchange="gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(55,65,81,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Sem overlay">
+                <input type="radio" name="overlayFutebol" value="none" onchange="gerarBannerAtual()" />
+                <div class="overlay-swatch none-swatch">✕</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Overlay (template simples) -->
+          <div id="overlayOpcoes">
+            <h3>Estilo do Overlay</h3>
+            <div class="overlay-options">
+              <label class="overlay-opt" title="Escuro">
+                <input type="radio" name="overlay" value="dark" checked onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch dark-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Roxo">
+                <input type="radio" name="overlay" value="purple" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch purple-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Azul">
+                <input type="radio" name="overlay" value="blue" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch blue-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Vermelho">
+                <input type="radio" name="overlay" value="red" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch red-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Sem overlay">
+                <input type="radio" name="overlay" value="none" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch none-swatch">✕</div>
+              </label>
+            </div>
+
+            <!-- Cor de Destaque (filmes simples) -->
+            <div style="margin-top:14px;">
+              <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:8px;">Cor de Destaque</label>
+              <div class="cor-selector" id="corDestaqueFilme">
+                <div class="cor-opt active" data-cor="#F77F30" style="background:#F77F30;" onclick="selecionarCorFilme('#F77F30',this)"></div>
+                <div class="cor-opt" data-cor="#E14760" style="background:#E14760;" onclick="selecionarCorFilme('#E14760',this)"></div>
+                <div class="cor-opt" data-cor="#ffffff" style="background:#ffffff;" onclick="selecionarCorFilme('#ffffff',this)"></div>
+                <div class="cor-opt" data-cor="#FFD700" style="background:#FFD700;" onclick="selecionarCorFilme('#FFD700',this)"></div>
+                <div class="cor-opt" data-cor="#00FF87" style="background:#00FF87;" onclick="selecionarCorFilme('#00FF87',this)"></div>
+                <div class="cor-opt" data-cor="#00BFFF" style="background:#00BFFF;" onclick="selecionarCorFilme('#00BFFF',this)"></div>
+                <div class="cor-opt" data-cor="#FF4500" style="background:#FF4500;" onclick="selecionarCorFilme('#FF4500',this)"></div>
+                <div class="cor-opt" data-cor="#9D2BBD" style="background:#9D2BBD;" onclick="selecionarCorFilme('#9D2BBD',this)"></div>
+                <div class="cor-opt" data-cor="#FF69B4" style="background:#FF69B4;" onclick="selecionarCorFilme('#FF69B4',this)"></div>
+                <div class="cor-opt" data-cor="#C0C0C0" style="background:#C0C0C0;" onclick="selecionarCorFilme('#C0C0C0',this)"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cor do fundo (template promocional) -->
+          <div id="fundoPromoOpcoes" style="display:none;">
+            <h3>Cor do Fundo</h3>
+            <div class="overlay-options">
+              <!-- Opção de imagem do filme: só aparece na aba filmes -->
+              <label class="overlay-opt overlay-opt-filme-only" title="Imagem do Filme">
+                <input type="radio" name="fundoPromo" value="imagem" checked onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#1a1a2e,#4a4a5e);font-size:1.2rem;">🎬</div>
+              </label>
+              <label class="overlay-opt" title="Roxo">
+                <input type="radio" name="fundoPromo" value="roxo" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#1a0a2e,#6b21a8);"></div>
+              </label>
+              <label class="overlay-opt" title="Azul">
+                <input type="radio" name="fundoPromo" value="azul" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#0a1628,#1e3a8a);"></div>
+              </label>
+              <label class="overlay-opt" title="Vermelho">
+                <input type="radio" name="fundoPromo" value="vermelho" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#1a0a0a,#991b1b);"></div>
+              </label>
+              <label class="overlay-opt" title="Verde">
+                <input type="radio" name="fundoPromo" value="verde" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#0a1a0a,#14532d);"></div>
+              </label>
+              <label class="overlay-opt" title="Laranja">
+                <input type="radio" name="fundoPromo" value="laranja" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#1a0a00,#c2410c);"></div>
+              </label>
+              <label class="overlay-opt" title="Rosa">
+                <input type="radio" name="fundoPromo" value="rosa" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#1a0a14,#be185d);"></div>
+              </label>
+              <label class="overlay-opt" title="Ciano">
+                <input type="radio" name="fundoPromo" value="ciano" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#0a1a1a,#0891b2);"></div>
+              </label>
+              <label class="overlay-opt" title="Turquesa">
+                <input type="radio" name="fundoPromo" value="turquesa" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#0a1a1a,#14b8a6);"></div>
+              </label>
+              <label class="overlay-opt" title="Dourado">
+                <input type="radio" name="fundoPromo" value="dourado" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#1a1200,#ca8a04);"></div>
+              </label>
+              <label class="overlay-opt" title="Preto">
+                <input type="radio" name="fundoPromo" value="preto" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background: linear-gradient(135deg,#000,#1a1a1a);"></div>
+              </label>
+            </div>
+          </div><!-- fecha fundoPromoOpcoes -->
+
+          <!-- Overlay (template promocional) -->
+          <div id="overlayPromoOpcoes" style="display:none;">
+            <h3>Estilo do Overlay</h3>
+            <div class="overlay-options">
+              <label class="overlay-opt" title="Escuro">
+                <input type="radio" name="overlayPromo" value="dark" checked onchange="gerarBannerAtual()" />
+                <div class="overlay-swatch dark-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Roxo">
+                <input type="radio" name="overlayPromo" value="purple" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch purple-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Azul">
+                <input type="radio" name="overlayPromo" value="blue" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch blue-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Vermelho">
+                <input type="radio" name="overlayPromo" value="red" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch red-swatch"></div>
+              </label>
+              <label class="overlay-opt" title="Verde">
+                <input type="radio" name="overlayPromo" value="green" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(20,83,45,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Laranja">
+                <input type="radio" name="overlayPromo" value="orange" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(124,45,18,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Rosa">
+                <input type="radio" name="overlayPromo" value="pink" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(131,24,67,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Cinza">
+                <input type="radio" name="overlayPromo" value="gray" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch" style="background:rgba(55,65,81,0.6);"></div>
+              </label>
+              <label class="overlay-opt" title="Sem overlay">
+                <input type="radio" name="overlayPromo" value="none" onchange="salvarPreferencias(); gerarBannerAtual()" />
+                <div class="overlay-swatch none-swatch">✕</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Imagens de Futebol (só aparece na aba futebol) -->
+          <div id="fundoFutebolImagens" style="display:none !important;">
+            <h3 style="margin-top:14px;">⚽ Imagens de Futebol</h3>
+            <div class="overlay-options fut-img-options">
+            <label class="overlay-opt" title="Futebol 1">
+              <input type="radio" name="fundoPromo" value="fut1" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/main/Fut1.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">1</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 2">
+              <input type="radio" name="fundoPromo" value="fut2" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/main/Fut2.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">2</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 3">
+              <input type="radio" name="fundoPromo" value="fut3" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/main/Fut3.png');background-size:cover;background-position:center;">
+                <span class="fut-label">3</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 4">
+              <input type="radio" name="fundoPromo" value="fut4" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/main/Fut4.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">4</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 5">
+              <input type="radio" name="fundoPromo" value="fut5" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/main/Fut5.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">5</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 6">
+              <input type="radio" name="fundoPromo" value="fut6" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/Fut6.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">6</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 7">
+              <input type="radio" name="fundoPromo" value="fut7" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/fut7.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">7</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 8">
+              <input type="radio" name="fundoPromo" value="fut8" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/Fut8.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">8</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 9">
+              <input type="radio" name="fundoPromo" value="fut9" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/Fut9.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">9</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 10">
+              <input type="radio" name="fundoPromo" value="fut10" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/Fut10.jpg');background-size:cover;background-position:center;">
+                <span class="fut-label">10</span>
+              </div>
+            </label>
+            <label class="overlay-opt" title="Futebol 11">
+              <input type="radio" name="fundoPromo" value="fut11" onchange="gerarBannerAtual()" />
+              <div class="overlay-swatch fut-swatch" style="background-image:url('https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/Fut11.png');background-size:cover;background-position:center;">
+                <span class="fut-label">11</span>
+              </div>
+            </label>
+            </div>
+          </div><!-- fecha fundoFutebolImagens -->
+
+          <!-- Cor de Destaque (filmes promocional) -->
+          <div id="corDestaquePromoOpcoes" style="display:none;">
+            <div style="margin-top:14px;">
+              <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:8px;">Cor de Destaque</label>
+              <div class="cor-selector" id="corDestaqueFilmePromo">
+                <div class="cor-opt active" data-cor="#F77F30" style="background:#F77F30;" onclick="selecionarCorFilme('#F77F30',this)"></div>
+                <div class="cor-opt" data-cor="#E14760" style="background:#E14760;" onclick="selecionarCorFilme('#E14760',this)"></div>
+                <div class="cor-opt" data-cor="#ffffff" style="background:#ffffff;" onclick="selecionarCorFilme('#ffffff',this)"></div>
+                <div class="cor-opt" data-cor="#FFD700" style="background:#FFD700;" onclick="selecionarCorFilme('#FFD700',this)"></div>
+                <div class="cor-opt" data-cor="#00FF87" style="background:#00FF87;" onclick="selecionarCorFilme('#00FF87',this)"></div>
+                <div class="cor-opt" data-cor="#00BFFF" style="background:#00BFFF;" onclick="selecionarCorFilme('#00BFFF',this)"></div>
+                <div class="cor-opt" data-cor="#FF4500" style="background:#FF4500;" onclick="selecionarCorFilme('#FF4500',this)"></div>
+                <div class="cor-opt" data-cor="#9D2BBD" style="background:#9D2BBD;" onclick="selecionarCorFilme('#9D2BBD',this)"></div>
+                <div class="cor-opt" data-cor="#FF69B4" style="background:#FF69B4;" onclick="selecionarCorFilme('#FF69B4',this)"></div>
+                <div class="cor-opt" data-cor="#C0C0C0" style="background:#C0C0C0;" onclick="selecionarCorFilme('#C0C0C0',this)"></div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-gerar" onclick="gerarBannerAtual()">✨ Gerar Banner</button>
+        </div>
+      </div>
+
+      <!-- PAINEL DIREITO: PREVIEW -->
+      <div class="painel-preview">
+        <h3>Preview</h3>
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="bannerCanvas"></canvas>
+          <div class="canvas-placeholder" id="canvasPlaceholder">
+            <span>🎬</span>
+            <p>Busque um filme para começar</p>
+          </div>
+          <div class="canvas-loading" id="canvasLoading" style="display:none;">
+            <div class="spinner"></div>
+            <p>Gerando banner...</p>
+          </div>
+        </div>
+        <div class="preview-actions" id="previewActions" style="display:none;">
+          <button class="btn-download" onclick="downloadBanner()">⬇️ Baixar Banner</button>
+          <button class="btn-share" onclick="compartilharBanner()">📤 Compartilhar</button>
+        </div>
+        <div id="filmeSelecionado" class="filme-info" style="display:none;">
+          <img id="filmeThumb" src="" alt="" />
+          <div>
+            <strong id="filmeNome"></strong>
+            <span id="filmeAno"></span>
+          </div>
+        </div>
+
+        <!-- RESUMO DO FILME -->
+        <div id="resumoCard" class="resumo-card" style="display:none;">
+          <div class="resumo-header">
+            <span class="resumo-titulo">📝 Resumo para Redes Sociais</span>
+            <div class="resumo-acoes">
+              <button class="btn-resumo-acao" onclick="copiarResumo()" title="Copiar texto">📋 Copiar</button>
+              <button class="btn-resumo-acao" onclick="gerarResumoPersonalizado()" title="Gerar versão diferente">🔄 Outro</button>
+            </div>
+          </div>
+          <div id="resumoTexto" class="resumo-texto"></div>
+          <div class="resumo-tags" id="resumoTags"></div>
+          <div class="resumo-nota">
+            <span>✏️ Clique no texto para editar antes de copiar</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- FIM criadorConteudo -->
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="como-funciona">
+    <h2>Como Funciona</h2>
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-circle">1</div>
+        <h4>Busque o Título</h4>
+        <p>Digite o nome do filme ou série e selecione nos resultados</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-circle">2</div>
+        <h4>Adicione sua Logo</h4>
+        <p>Faça upload da sua logo em PNG para personalizar a arte</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-circle">3</div>
+        <h4>Escolha o Formato</h4>
+        <p>Feed ou Quadrado — otimizado para cada rede social</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-circle">4</div>
+        <h4>Baixe e Publique</h4>
+        <p>Download em alta resolução pronto para postar</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <img src="https://raw.githubusercontent.com/dedex1711-eng/BannerFlix/refs/heads/main/logo.png" alt="BannerFlix" class="footer-logo-img" />
+    </div>
+    <p>A ferramenta nº 1 para revendedores criarem banners profissionais em segundos.</p>
+    <div class="footer-links">
+      <a href="#">Política de Privacidade</a>
+      <a href="#">Termos de Uso</a>
+    </div>
+    <small>© 2026 BannerFlix. Todos os direitos reservados.</small>
+  </footer>
+
+  <!-- MODAL SEM CRÉDITOS -->
+  <div class="modal-overlay" id="modalSemCreditos" onclick="fecharModalFora(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+      <h2 class="modal-title">😔 Créditos Esgotados</h2>
+      <p class="modal-sub">Você não tem mais créditos disponíveis para criar banners.</p>
+      
+      <div style="background:var(--bg3);padding:20px;border-radius:var(--radius);margin:20px 0;">
+        <h3 style="font-size:1.1rem;margin-bottom:16px;">Escolha um plano:</h3>
+        
+        <div style="display:grid;gap:12px;">
+          <div style="background:var(--bg2);padding:16px;border-radius:var(--radius-sm);border:2px solid rgba(124,58,237,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <strong style="color:#a855f7;">💜 Mensal</strong>
+              <span style="font-size:1.2rem;font-weight:700;">R$ 29,90</span>
+            </div>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;">Banners ilimitados por 30 dias</p>
+            <button class="btn-auth" style="width:100%;padding:10px;" onclick="alert('Entre em contato para assinar')">Assinar Agora</button>
+          </div>
+
+          <div style="background:var(--bg2);padding:16px;border-radius:var(--radius-sm);border:2px solid rgba(37,99,235,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <strong style="color:#60a5fa;">💙 Anual</strong>
+              <span style="font-size:1.2rem;font-weight:700;">R$ 299,90</span>
+            </div>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:4px;">Banners ilimitados por 365 dias</p>
+            <p style="font-size:0.75rem;color:#4ade80;margin-bottom:12px;">✨ Economize R$ 59,00</p>
+            <button class="btn-auth" style="width:100%;padding:10px;" onclick="alert('Entre em contato para assinar')">Assinar Agora</button>
+          </div>
+
+          <div style="background:var(--bg2);padding:16px;border-radius:var(--radius-sm);border:2px solid rgba(234,179,8,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <strong style="color:#fbbf24;">👑 Vitalício</strong>
+              <span style="font-size:1.2rem;font-weight:700;">R$ 997,00</span>
+            </div>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:4px;">Banners ilimitados para sempre</p>
+            <p style="font-size:0.75rem;color:#4ade80;margin-bottom:12px;">✨ Pagamento único</p>
+            <button class="btn-auth" style="width:100%;padding:10px;background:linear-gradient(135deg,#eab308,#ca8a04);" onclick="alert('Entre em contato para assinar')">Assinar Agora</button>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align:center;font-size:0.85rem;color:var(--text-muted);">
+        Entre em contato pelo WhatsApp para assinar
+      </p>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+  <!-- CSS e JS do Hero Slider -->
+  <style>
+    :root {
+      transition: --accent 0.8s ease, --accent-glow 0.8s ease;
+    }
+    .gradient-text {
+      transition: background 0.8s ease !important;
+    }
+    .hero-slider {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .hero-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+    }
+    .hero-slide.active {
+      opacity: 1;
+      position: relative;
+    }
+    .slider-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .dot.active {
+      background: var(--accent);
+      width: 24px;
+      border-radius: 5px;
+    }
+    .dot:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+    /* Ícone de perfil SVG */
+    .nav-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-avatar svg {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+
+  <script>
+    // Hero Slider
+    let slideAtual = 0;
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.dot');
+    let sliderInterval = null;
+    
+    // Cores originais do CSS (antes do slider modificar)
+    const coresOriginais = {
+      accent: '#F77F30',
+      accentGlow: 'rgba(247, 127, 48, 0.3)',
+      gradient: 'linear-gradient(135deg, #F77F30 0%, #E14760 50%, #9D2BBD 100%)'
+    };
+    
+    // Cores dos temas (mesmas das abas Filmes e Futebol)
+    const temas = {
+      filmes: {
+        accent: '#F77F30',
+        accentGlow: 'rgba(247, 127, 48, 0.3)',
+        gradient: 'linear-gradient(135deg, #F77F30 0%, #E14760 50%, #9D2BBD 100%)'
+      },
+      futebol: {
+        accent: '#2E7D32',
+        accentGlow: 'rgba(46, 125, 50, 0.3)',
+        gradient: 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 50%, #4CAF50 100%)'
+      }
+    };
+    
+    // Verificar se o usuário está logado
+    function usuarioEstaLogado() {
+      const navUser = document.getElementById('navUser');
+      return navUser && navUser.style.display !== 'none';
+    }
+    
+    function mudarSlide(index) {
+      slides[slideAtual].classList.remove('active');
+      dots[slideAtual].classList.remove('active');
+      
+      slideAtual = index;
+      
+      slides[slideAtual].classList.add('active');
+      dots[slideAtual].classList.add('active');
+      
+      // Só mudar tema se o usuário NÃO estiver logado
+      if (!usuarioEstaLogado()) {
+        const tema = slides[slideAtual].getAttribute('data-theme') || 'filmes';
+        aplicarTema(tema);
+      }
+    }
+    
+    function aplicarTema(tema) {
+      const cores = temas[tema];
+      if (!cores) return;
+      
+      document.documentElement.style.setProperty('--accent', cores.accent);
+      document.documentElement.style.setProperty('--accent-glow', cores.accentGlow);
+      
+      // Atualizar gradiente do texto
+      const gradientText = document.querySelector('.gradient-text');
+      if (gradientText) {
+        gradientText.style.background = cores.gradient;
+        gradientText.style.webkitBackgroundClip = 'text';
+        gradientText.style.backgroundClip = 'text';
+      }
+    }
+    
+    function restaurarCoresOriginais() {
+      document.documentElement.style.setProperty('--accent', coresOriginais.accent);
+      document.documentElement.style.setProperty('--accent-glow', coresOriginais.accentGlow);
+      
+      const gradientText = document.querySelector('.gradient-text');
+      if (gradientText) {
+        gradientText.style.background = coresOriginais.gradient;
+        gradientText.style.webkitBackgroundClip = 'text';
+        gradientText.style.backgroundClip = 'text';
+      }
+    }
+    
+    function iniciarSlider() {
+      // Se o usuário já estiver logado, usar cores originais
+      if (usuarioEstaLogado()) {
+        restaurarCoresOriginais();
+      } else {
+        // Aplicar tema inicial ao carregar a página (só se não estiver logado)
+        const temaInicial = slides[0].getAttribute('data-theme') || 'filmes';
+        aplicarTema(temaInicial);
+      }
+      
+      // Auto-play do slider (troca a cada 4 segundos)
+      sliderInterval = setInterval(() => {
+        const proximoSlide = (slideAtual + 1) % slides.length;
+        mudarSlide(proximoSlide);
+      }, 4000);
+    }
+    
+    // Iniciar quando a página carregar
+    window.addEventListener('DOMContentLoaded', iniciarSlider);
+    
+    // Restaurar cores originais quando o usuário logar
+    window.addEventListener('userLoggedIn', () => {
+      console.log('Usuário logado - restaurando cores originais');
+      restaurarCoresOriginais();
+    });
+    
+    // Observar mudanças no elemento navUser para detectar login
+    const observer = new MutationObserver(() => {
+      if (usuarioEstaLogado()) {
+        restaurarCoresOriginais();
+      }
+    });
+    
+    // Observar o elemento navUser quando ele existir
+    const checkNavUser = setInterval(() => {
+      const navUser = document.getElementById('navUser');
+      if (navUser) {
+        observer.observe(navUser, { attributes: true, attributeFilter: ['style'] });
+        clearInterval(checkNavUser);
+      }
+    }, 100);
+  </script>
+
+  <!-- Scripts -->
+  <!-- 1. Biblioteca LicenseAuth (deve ser carregada primeiro) -->
+  <script src="licenseauth-lib.js"></script>
+  
+  <!-- 2. Sistema de autenticação com LicenseAuth -->
+  <script src="auth-licenseauth-js.js"></script>
+  
+  <!-- 3. App principal (criador de banners) -->
+  <script src="app.js?v=20260502014"></script>
+  
+  <script>
+    // Scripts carregados
+  </script>
+  <!-- VERIFICAÇÃO DE EXPIRAÇÃO DE CHAVE -->
+  <script>
+    // ===== VERIFICAÇÃO DE EXPIRAÇÃO DE CHAVE =====
+    function verificarExpiracaoChave() {
+      if (!usuarioAtual) return;
+
+      const dias = usuarioAtual.dias || 0;
+      
+      // Se for ilimitado (dias = 0), não precisa verificar
+      if (dias === 0) return;
+      
+      // Se os dias chegaram a 0 ou menos, deslogar
+      if (dias <= 0) {
+        showToast('⏰ Sua chave de licença expirou. Faça login novamente.');
+        fazerLogout();
+        return;
+      }
+      
+      // Se faltam menos de 1 dia, avisar
+      if (dias === 1) {
+        showToast('⚠️ Sua chave expira em 1 dia!');
+      }
+    }
+
+    // ===== INICIAR VERIFICAÇÃO PERIÓDICA =====
+    function iniciarVerificacaoExpiracaoPeriodia() {
+      // Verifica a cada 1 hora (3600000 ms)
+      setInterval(() => {
+        verificarExpiracaoChave();
+      }, 3600000);
+      
+      // Também verifica ao carregar a página
+      verificarExpiracaoChave();
+    }
+
+    // Inicia a verificação quando a página carrega
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        iniciarVerificacaoExpiracaoPeriodia();
+      }, 2000); // Aguarda 2 segundos para garantir que tudo carregou
+    });
+  </script>
+</body>
+</html>
